@@ -46,8 +46,8 @@ install_nomachine() {
         x86_64)
             echo "Installing NoMachine for x86_64 architecture..."
             # Replace with actual download link for x86_64
-            wget https://download.nomachine.com/download/8.11/Linux/nomachine_8.11.3_4_x86_64.rpm
-            sudo dpkg -i nomachine_8.11.3_4_x86_64.rpm
+            wget https://download.nomachine.com/download/8.11/Linux/nomachine_8.11.3_4_amd64.deb
+            sudo dpkg -i nomachine_8.11.3_4_amd64.deb
             ;;
         arm64)
             echo "Installing NoMachine for arm64 architecture..."
