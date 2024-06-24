@@ -32,6 +32,13 @@ BWhite='\e[1;37m'       # أبيض بالخط العريض
 
 #######################################################
 
+# تحقيق المسار المطلوب وإنشاؤه إذا لم يكن موجودًا
+REQUIRED_PATH="/path/to/lightweight-desktop-environment"
+if [ ! -d "$REQUIRED_PATH" ]; then
+    echo "إنشاء المسار المطلوب: $REQUIRED_PATH"
+    mkdir -p "$REQUIRED_PATH"
+fi
+
 # تنظيف الشاشة وإعداد رسائل الإشعار
 echo -ne '\033c'
 trap RM_HT_FOLDER SIGINT SIGQUIT SIGTSTP
@@ -86,10 +93,10 @@ install_browser() {
                 -e TZ=Etc/UTC \
                 -p 3000:3000 \
                 -p 3001:3001 \
-                -v /chromium:/config \
+                -v $REQUIRED_PATH:/config \
                 --shm-size="7gb" \
                 --restart unless-stopped \
-                --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
+                --mount type=bind,source=$REQUIRED_PATH,destination=/usr/share/X11 \
                 -e NO_VNC_SERVER="true" \
                 ghcr.io/linuxserver/chromium:latest
             ;;
@@ -103,10 +110,10 @@ install_browser() {
                 -e TZ=Etc/UTC \
                 -p 3000:3000 \
                 -p 3001:3001 \
-                -v /firefox:/config \
+                -v $REQUIRED_PATH:/config \
                 --shm-size="7gb" \
                 --restart unless-stopped \
-                --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
+                --mount type=bind,source=$REQUIRED_PATH,destination=/usr/share/X11 \
                 -e NO_VNC_SERVER="true" \
                 ghcr.io/linuxserver/firefox:latest
             ;;
@@ -120,10 +127,10 @@ install_browser() {
                 -e TZ=Etc/UTC \
                 -p 3000:3000 \
                 -p 3001:3001 \
-                -v /opera:/config \
+                -v $REQUIRED_PATH:/config \
                 --shm-size="7gb" \
                 --restart unless-stopped \
-                --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
+                --mount type=bind,source=$REQUIRED_PATH,destination=/usr/share/X11 \
                 -e NO_VNC_SERVER="true" \
                 ghcr.io/linuxserver/opera:latest
             ;;
@@ -137,10 +144,10 @@ install_browser() {
                 -e TZ=Etc/UTC \
                 -p 3000:3000 \
                 -p 3001:3001 \
-                -v /mullvad-browser:/config \
+                -v $REQUIRED_PATH:/config \
                 --shm-size="7gb" \
                 --restart unless-stopped \
-                --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
+                --mount type=bind,source=$REQUIRED_PATH,destination=/usr/share/X11 \
                 -e NO_VNC_SERVER="true" \
                 ghcr.io/linuxserver/mullvad-browser:latest
             ;;
@@ -154,15 +161,15 @@ install_browser() {
                 -e TZ=Etc/UTC \
                 -p 3000:3000 \
                 -p 3001:3001 \
-                -v /edge:/config \
+                -v $REQUIRED_PATH:/config \
                 --shm-size="7gb" \
                 --restart unless-stopped \
-                --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
+                --mount type=bind,source=$REQUIRED_PATH,destination=/usr/share/X11 \
                 -e NO_VNC_SERVER="true" \
                 ghcr.io/linuxserver/microsoft-edge:latest
             ;;
         *)
-            echo "خيار غير صالح. يرجى المحاولة مرة أخرى."
+            echo "الخيار غير صالح. يرجى المحاولة مرة أخرى."
             exit 1
             ;;
     esac
@@ -187,7 +194,7 @@ echo ""
 echo -e -n "$White    ${Red} [${Cyan}!${Red}]$White اكتب$BRed رقم المعرف$White "
 read -p "المطلوب : " choice
 
-# تثبيت NoMachine أولاً
+# تثبيت NoMachine
 echo "جارٍ تثبيت NoMachine..."
 install_nomachine
 
