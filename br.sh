@@ -1,177 +1,193 @@
 #!/bin/bash
 
-# ألوان النصوص
-Black='\e[0;30m'        
-Red='\e[0;31m'          
-Green='\e[0;32m'        
-Yellow='\e[0;33m'       
-Blue='\e[0;34m'         
-Purple='\e[0;35m'       
-Cyan='\e[0;36m'         
-White='\e[0;37m'        
+# Regular Colors
+Black='\e[0;30m'        # Black
+Red='\e[0;31m'          # Red
+Green='\e[0;32m'        # Green
+Yellow='\e[0;33m'       # Yellow
+Blue='\e[0;34m'         # Blue
+Purple='\e[0;35m'       # Purple
+Cyan='\e[0;36m'         # Cyan
+White='\e[0;37m'        # White
 
-# ألوان النصوص بخط عريض
-BBlack='\e[1;30m'       
-BRed='\e[1;31m'         
-BGreen='\e[1;32m'       
-BYellow='\e[1;33m'      
-BBlue='\e[1;34m'        
-BPurple='\e[1;35m'      
-BCyan='\e[1;36m'        
-BWhite='\e[1;37m'       
+# Bold
+BBlack='\e[1;30m'       # Black
+BRed='\e[1;31m'         # Red
+BGreen='\e[1;32m'       # Green
+BYellow='\e[1;33m'      # Yellow
+BBlue='\e[1;34m'        # Blue
+BPurple='\e[1;35m'      # Purple
+BCyan='\e[1;36m'        # Cyan
+BWhite='\e[1;37m'       # White
 
-# دالة لحذف المجلد المؤقت عند الخروج
+#######################################################
+
+echo -ne '\033c'
+trap RM_HT_FOLDER SIGINT SIGQUIT SIGTSTP
+echo ""
+sleep 0.1
+echo -e "${Cyan}    +${Yellow}--------------------------------------------------------------------------------------------------------------------------${Cyan}+${Yellow}"
+sleep 0.1
+echo -e "                                     |${BRed} Online Browser ${BYellow}by${BGreen} Hamza Hammouch${Cyan} powered by${BPurple} linuxserver${Yellow} |"
+sleep 0.1
+echo -e "                                     ${Cyan}+${Yellow}--------------------------------------------------------${Cyan}+"
+sleep 0.1
+
+#######################################################
+
+# Function to remove temporary folder on exit
 RM_HT_FOLDER() {
   rm -rf /tmp/ht
 }
 
-# التقاط الإشارات لحذف المجلد المؤقت
-trap RM_HT_FOLDER SIGINT SIGQUIT SIGTSTP
+# Function to install NoMachine based on system architecture
+install_nomachine() {
+    case "$(uname -m)" in
+        x86_64)
+            echo "Installing NoMachine for x86_64 architecture..."
+            # Replace with actual download link for x86_64
+            wget https://download.nomachine.com/download/7.6/Linux/nomachine_7.6.2_4_amd64.deb
+            sudo dpkg -i nomachine_7.6.2_4_amd64.deb
+            ;;
+        arm64)
+            echo "Installing NoMachine for arm64 architecture..."
+            # Replace with actual download link for arm64
+            wget https://download.nomachine.com/download/7.6/Linux/nomachine_7.6.2_4_arm64.deb
+            sudo dpkg -i nomachine_7.6.2_4_arm64.deb
+            ;;
+        *)
+            echo "Unsupported architecture: $(uname -m)"
+            exit 1
+            ;;
+    esac
+}
 
-# مسح الشاشة
-echo -ne '\033c'
+# Function to install browsers using Docker
+install_browser() {
+    case $choice in
+        1)
+            echo "Installing Chromium..."
+            docker run -d \
+                --name=chromium \
+                --security-opt seccomp=unconfined \
+                -e PUID=1000 \
+                -e PGID=1000 \
+                -e TZ=Etc/UTC \
+                -p 3000:3000 \
+                -p 3001:3001 \
+                -v /chromium:/config \
+                --shm-size="7gb" \
+                --restart unless-stopped \
+                --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
+                -e NO_VNC_SERVER="true" \
+                ghcr.io/linuxserver/chromium:latest
+            ;;
+        2)
+            echo "Installing Firefox..."
+            docker run -d \
+                --name=firefox \
+                --security-opt seccomp=unconfined \
+                -e PUID=1000 \
+                -e PGID=1000 \
+                -e TZ=Etc/UTC \
+                -p 3000:3000 \
+                -p 3001:3001 \
+                -v /firefox:/config \
+                --shm-size="7gb" \
+                --restart unless-stopped \
+                --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
+                -e NO_VNC_SERVER="true" \
+                ghcr.io/linuxserver/firefox:latest
+            ;;
+        3)
+            echo "Installing Opera..."
+            docker run -d \
+                --name=opera \
+                --security-opt seccomp=unconfined \
+                -e PUID=1000 \
+                -e PGID=1000 \
+                -e TZ=Etc/UTC \
+                -p 3000:3000 \
+                -p 3001:3001 \
+                -v /opera:/config \
+                --shm-size="7gb" \
+                --restart unless-stopped \
+                --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
+                -e NO_VNC_SERVER="true" \
+                ghcr.io/linuxserver/opera:latest
+            ;;
+        4)
+            echo "Installing Mullvad Browser..."
+            docker run -d \
+                --name=mullvad-browser \
+                --security-opt seccomp=unconfined \
+                -e PUID=1000 \
+                -e PGID=1000 \
+                -e TZ=Etc/UTC \
+                -p 3000:3000 \
+                -p 3001:3001 \
+                -v /mullvad-browser:/config \
+                --shm-size="7gb" \
+                --restart unless-stopped \
+                --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
+                -e NO_VNC_SERVER="true" \
+                ghcr.io/linuxserver/mullvad-browser:latest
+            ;;
+        5)
+            echo "Installing Microsoft Edge..."
+            docker run -d \
+                --name=edge \
+                --security-opt seccomp=unconfined \
+                -e PUID=1000 \
+                -e PGID=1000 \
+                -e TZ=Etc/UTC \
+                -p 3000:3000 \
+                -p 3001:3001 \
+                -v /edge:/config \
+                --shm-size="7gb" \
+                --restart unless-stopped \
+                --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
+                -e NO_VNC_SERVER="true" \
+                ghcr.io/linuxserver/microsoft-edge:latest
+            ;;
+        *)
+            echo "Invalid choice. Please try again."
+            exit 1
+            ;;
+    esac
+}
 
-# عرض العنوان
-echo ""
-echo -e "${Cyan}    +${Yellow}--------------------------------------------------------------------------------------------------------------------------${Cyan}+${Yellow}"
-echo -e "                                     |${BRed} متصفح الإنترنت الأونلاين ${BYellow}من قبل${BGreen} حمزة حموش${Cyan} مدعوم بواسطة${BPurple} linuxserver${Yellow} |"
-echo -e "                                     ${Cyan}+${Yellow}--------------------------------------------------------${Cyan}+"
-echo ""
+#######################################################
 
-# عرض خيارات التصفح
 echo -e "${Yellow}     +${White}-------------------------------------------------------------------${Yellow}+"
-echo -e "${White}     | ${Yellow} الرقم ${White} |                   ${BPurple}   اسم المتصفح                       ${White}   |"
+echo -e "${White}     | ${Yellow} ID ${White} |                   ${BPurple}   Browser Name                       ${White}   |"
 echo -e "${Yellow}     +${White}-------------------------------------------------------------------${Yellow}+"
-echo -e "${White}     | ${Red}[${Yellow}01${Red}]${White} |$Green تثبيت كروميوم${White}                                           |"
-echo -e "${White}     | ${Red}[${Yellow}02${Red}]${White} |$Green تثبيت فايرفوكس${White}                                          |"
-echo -e "${White}     | ${Red}[${Yellow}03${Red}]${White} |$Green تثبيت أوبرا${White}                                              |"
-echo -e "${White}     | ${Red}[${Yellow}04${Red}]${White} |$Green تثبيت متصفح مولفاد${White}                                    |"
-echo -e "${White}     | ${Red}[${Yellow}05${Red}]${White} |$Green تثبيت مايكروسوفت إيدج${White}                                  |"
+echo -e "${White}     | ${Red}[${Yellow}01${Red}]${White} |$Green Install Chromium${White}                                           |"
+echo -e "${White}     | ${Red}[${Yellow}02${Red}]${White} |$Green Install Firefox${White}                                            |"
+echo -e "${White}     | ${Red}[${Yellow}03${Red}]${White} |$Green Install Opera${White}                                              |"
+echo -e "${White}     | ${Red}[${Yellow}04${Red}]${White} |$Green Install Mullvad Browser${White}                                    |"
+echo -e "${White}     | ${Red}[${Yellow}05${Red}]${White} |$Green Install Microsoft Edge${White}                                      |"
 echo -e "${Yellow}     +${White}-------------------------------------------------------------------${Yellow}+"
 echo ""
+echo -e -n "$White    ${Red} [${Cyan}!Note:${Red}]$White If your choice is Chromium type $Green 1${White} not ${Red}01$White and the same principle applies to other browsers "
+echo ""
+echo ""
+echo -e -n "$White    ${Red} [${Cyan}!${Red}]$White Type the$BRed ID$White "
+read -p "of your choice : " choice
 
-# استقبال اختيار المستخدم
-echo -e -n "$White    ${Red} [${Cyan}!${Red}]$White اكتب ال${BRed}رقم${White} المراد تحديده: "
-read choice
+# Install NoMachine
+echo "Installing NoMachine..."
+install_nomachine
 
-# معالجة اختيار المستخدم
-case $choice in
-    1)
-        echo "جاري تثبيت كروميوم..."
-        docker run -d \
-            --name=chromium \
-            --security-opt seccomp=unconfined \
-            -e PUID=1000 \
-            -e PGID=1000 \
-            -e TZ=Etc/UTC \
-            -p 3000:3000 \
-            -p 3001:3001 \
-            -v /chromium:/config \
-            --shm-size="7gb" \
-            --restart unless-stopped \
-            --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
-            -e NO_VNC_SERVER="true" \
-            ghcr.io/linuxserver/chromium:latest
-        ;;
+# Install selected browser
+install_browser
 
-    2)
-        echo "جاري تثبيت فايرفوكس..."
-        docker run -d \
-            --name=firefox \
-            --security-opt seccomp=unconfined \
-            -e PUID=1000 \
-            -e PGID=1000 \
-            -e TZ=Etc/UTC \
-            -p 3000:3000 \
-            -p 3001:3001 \
-            -v /firefox:/config \
-            --shm-size="7gb" \
-            --restart unless-stopped \
-            --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
-            -e NO_VNC_SERVER="true" \
-            ghcr.io/linuxserver/firefox:latest
-        ;;
-
-    3)
-        echo "جاري تثبيت أوبرا..."
-        docker run -d \
-            --name=opera \
-            --security-opt seccomp=unconfined \
-            -e PUID=1000 \
-            -e PGID=1000 \
-            -e TZ=Etc/UTC \
-            -p 3000:3000 \
-            -p 3001:3001 \
-            -v /opera:/config \
-            --shm-size="7gb" \
-            --restart unless-stopped \
-            --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
-            -e NO_VNC_SERVER="true" \
-            ghcr.io/linuxserver/opera:latest
-        ;;
-
-    4)
-        echo "جاري تثبيت متصفح مولفاد..."
-        docker run -d \
-            --name=mullvad-browser \
-            --security-opt seccomp=unconfined \
-            -e PUID=1000 \
-            -e PGID=1000 \
-            -e TZ=Etc/UTC \
-            -p 3000:3000 \
-            -p 3001:3001 \
-            -v /mullvad-browser:/config \
-            --shm-size="7gb" \
-            --restart unless-stopped \
-            --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
-            -e NO_VNC_SERVER="true" \
-            ghcr.io/linuxserver/mullvad-browser:latest
-        ;;
-
-    5)
-        echo "جاري تثبيت مايكروسوفت إيدج..."
-        docker run -d \
-            --name=microsoft-edge \
-            --security-opt seccomp=unconfined \
-            -e PUID=1000 \
-            -e PGID=1000 \
-            -e TZ=Etc/UTC \
-            -p 3000:3000 \
-            -p 3001:3001 \
-            -v /microsoft-edge:/config \
-            --shm-size="7gb" \
-            --restart unless-stopped \
-            --mount type=bind,source=/path/to/lightweight-desktop-environment,destination=/usr/share/X11 \
-            -e NO_VNC_SERVER="true" \
-            ghcr.io/linuxserver/microsoft-edge:latest
-        ;;
-
-    *)
-        echo "الرقم المدخل غير صحيح. يرجى المحاولة مرة أخرى."
-        exit 1
-        ;;
-esac
-
-# الحصول على عنوان IP ومنفذ الحاوية
-container_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $choice)
-container_port=$(docker port $choice | cut -d':' -f2)
-
-# عرض تفاصيل الاتصال
+# After browser installation, display connection details
 echo ""
 echo -e "${Yellow}  +-------------------------------------------------------------------+"
-echo -e "${White}  | ${BPurple}  تم تثبيت المتصفح بنجاح!${White}                                        |"
+echo -e "${White}  | ${BPurple}  Browser Installed!${White}                                        |"
 echo -e "${Yellow}  +-------------------------------------------------------------------+"
 echo ""
-echo -e "${White}  ${Red} [${Cyan}!${Red}]${White} لبدء المتصفح، قم بالاتصال بجلسة NoMachine الخاصة بك وقم بتشغيل:"
-echo -e "${White}      ${Red} nomachine --connect [remote-machine-ip]"
-echo ""
-echo -e "${White}  ${Red} [${Cyan}!${Red}]${White} ثم، في جلسة NoMachine، قم بتشغيل:"
-echo -e "${White}      ${Red} vncserver -localhost :5901"
-echo ""
-echo -e "${White}  ${Red} [${Cyan}!${Red}]${White} استخدم التفاصيل التالية للوصول إلى المتصفح:"
-echo -e "${White}      ${Red} Host: ${container_ip}"
-echo -e "${White}      ${Red} Port: ${container_port}"
-echo ""
-
-# خروج البرنامج
-exit 0
+echo -e "${White}  ${Red} [${Cyan}!${Red}]${White} To start the browser, connect to your NoMachine session and run:"
+echo -e "${White}      ${Red} nomachine --connect [remote-machine-ip] "
+echo -e "${White}      ${Red} vncserver -localhost :5901 ${White} "
